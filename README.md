@@ -1,4 +1,9 @@
-# Study Scheduler (Vanilla JS)
+Name: Jodie Kuo
+GitHub Username: jykuo25
+Deployed Version: https://jykuo25-hw3.netlify.app/
+Team PRD: 
+
+# Study Scheduler
 
 A lightweight, local-first web app to schedule work/study time, track progress with streaks, and share updates with friends.
 
