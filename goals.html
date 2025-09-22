@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Scheduler • Goals</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">📚 Study Scheduler</div>
+    <nav class="tabs">
+      <a class="tab-button" href="index.html">Dashboard</a>
+      <a class="tab-button" href="schedule.html">Schedule</a>
+      <a class="tab-button active" href="goals.html">Goals</a>
+      <a class="tab-button" href="friends.html">Friends</a>
+    </nav>
+  </header>
+
+  <main class="tab-views">
+    <section class="tab-view active" id="goals-page">
+      <div class="grid two">
+        <div class="card">
+          <div class="row between center">
+            <h2>Your Goals</h2>
+            <div class="row gap">
+              <select id="goals-sort">
+                <option value="created">Sort: Creation date</option>
+                <option value="due">Sort: Due date</option>
+                <option value="class">Sort: Class</option>
+              </select>
+              <button id="open-goal-modal" class="primary">+ New Goal</button>
+            </div>
+          </div>
+          <h3>Active</h3>
+          <ul id="goals-active" class="list"></ul>
+        </div>
+        <div class="card">
+          <h2>Completed</h2>
+          <ul id="goals-completed" class="list"></ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div>
+      <strong>Daily Streak:</strong> <span id="streak-count">0</span> 🔥
+    </div>
+    <div class="muted">Data stored locally in your browser (localStorage)</div>
+  </footer>
+
+  <template id="goal-row-template">
+    <li class="goal-item">
+      <div class="row between">
+        <div class="stack">
+          <div class="row gap">
+            <strong class="goal-title"></strong>
+            <span class="badge badge-muted goal-class" style="display:none;"></span>
+            <span class="badge badge-muted goal-due" style="display:none;"></span>
+          </div>
+          <small class="muted goal-sub"></small>
+          <div class="progress"><div class="progress-bar"></div></div>
+        </div>
+        <div class="row gap">
+          <button class="tiny complete">Complete</button>
+          <button class="tiny edit">Edit</button>
+          <button class="tiny remove warning">Delete</button>
+        </div>
+      </div>
+    </li>
+  </template>
+
+  <!-- Goal Modal -->
+  <div id="goal-modal" class="modal-backdrop" style="display:none;">
+    <div class="modal">
+      <div class="row between center" style="margin-bottom:8px;">
+        <h3 style="margin:0;">New / Edit Goal</h3>
+        <button id="close-goal-modal" class="tiny">✕</button>
+      </div>
+      <form id="goal-form" class="stack">
+        <input type="hidden" id="goal-id" />
+        <input id="goal-title" type="text" placeholder="Goal name (e.g., 'Study Calculus')" required />
+        <div class="row gap">
+          <label class="stack small">
+            <span>Hours / week</span>
+            <input id="goal-hours" type="number" min="1" value="5" required />
+          </label>
+          <label class="stack small">
+            <span>Preferred slot (mins)</span>
+            <input id="goal-slot" type="number" min="30" step="15" value="60" required />
+          </label>
+        </div>
+        <div class="row gap">
+          <label class="stack small">
+            <span>Class (optional)</span>
+            <input id="goal-class" type="text" placeholder="e.g., CS1060" />
+          </label>
+          <label class="stack small">
+            <span>Due date (optional)</span>
+            <input id="goal-due" type="date" />
+          </label>
+        </div>
+        <label class="stack small">
+          <span>Preferred day(s) and time(s)</span>
+          <div id="goal-windows" class="stack">
+            <div class="row gap">
+              <select id="win-day">
+                <option value="1">Mon</option>
+                <option value="2">Tue</option>
+                <option value="3">Wed</option>
+                <option value="4">Thu</option>
+                <option value="5">Fri</option>
+                <option value="6">Sat</option>
+                <option value="0">Sun</option>
+              </select>
+              <select id="win-time">
+                <option value="morning">Morning</option>
+                <option value="afternoon">Afternoon</option>
+                <option value="evening" selected>Evening</option>
+              </select>
+              <button type="button" id="add-window" class="secondary tiny">Add</button>
+            </div>
+            <div id="windows-badges" class="badges"></div>
+          </div>
+        </label>
+        <div class="row end gap">
+          <button type="button" id="reset-goal" class="warning">Reset</button>
+          <button type="submit" class="primary">Save Goal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

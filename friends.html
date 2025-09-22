@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Scheduler • Friends</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">📚 Study Scheduler</div>
+    <nav class="tabs">
+      <a class="tab-button" href="index.html">Dashboard</a>
+      <a class="tab-button" href="schedule.html">Schedule</a>
+      <a class="tab-button" href="goals.html">Goals</a>
+      <a class="tab-button active" href="friends.html">Friends</a>
+    </nav>
+  </header>
+
+  <main class="tab-views">
+    <section class="tab-view active" id="friends-page">
+      <div class="grid two">
+        <div class="card">
+          <h2>Friends Feed</h2>
+          <form id="post-form" class="stack">
+            <textarea id="post-content" rows="3" placeholder="Share an update with friends..."></textarea>
+            <div class="row end">
+              <button type="submit" class="primary">Post</button>
+            </div>
+          </form>
+          <ul id="feed" class="feed"></ul>
+        </div>
+        <div class="card">
+          <h2>Manage Friends</h2>
+          <div class="stack">
+            <form id="add-friend-form" class="row gap">
+              <input id="friend-name" type="text" placeholder="Add friend by name" />
+              <button type="submit" class="secondary">Add</button>
+            </form>
+            <div class="stack">
+              <label class="stack small">
+                <span>Search users</span>
+                <input id="friend-search" type="text" placeholder="Search by name" />
+              </label>
+              <ul id="friend-search-results" class="list"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid two" style="margin-top:16px;">
+        <div class="card">
+          <h2>Create Group</h2>
+          <form id="group-form" class="stack">
+            <input id="group-name" type="text" placeholder="Group name (e.g., Study Buddies)" required />
+            <label class="stack small">
+              <span>Members</span>
+              <select id="group-members" multiple></select>
+            </label>
+            <div class="row end">
+              <button type="submit" class="primary">Create Group</button>
+            </div>
+          </form>
+        </div>
+        <div class="card">
+          <h2>Your Groups</h2>
+          <ul id="groups-list" class="list"></ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div>
+      <strong>Daily Streak:</strong> <span id="streak-count">0</span> 🔥
+    </div>
+    <div class="muted">Data stored locally in your browser (localStorage)</div>
+  </footer>
+
+  <!-- Reuse the same post template as Dashboard -->
+  <template id="post-item-template">
+    <li class="post-item">
+      <div class="post-head">
+        <strong class="author"></strong>
+        <span class="time muted"></span>
+      </div>
+      <div class="content"></div>
+      <div class="actions">
+        <button class="like">👍 <span class="like-count">0</span></button>
+      </div>
+      <ul class="comments"></ul>
+      <form class="comment-form row gap">
+        <input type="text" class="comment-input" placeholder="Add a comment" />
+        <button class="tiny" type="submit">Send</button>
+      </form>
+    </li>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>

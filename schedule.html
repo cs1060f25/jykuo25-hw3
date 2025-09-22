@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Scheduler • Schedule</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">📚 Study Scheduler</div>
+    <nav class="tabs">
+      <a class="tab-button" href="index.html">Dashboard</a>
+      <a class="tab-button active" href="schedule.html">Schedule</a>
+      <a class="tab-button" href="goals.html">Goals</a>
+      <a class="tab-button" href="friends.html">Friends</a>
+    </nav>
+  </header>
+
+  <main class="tab-views">
+    <section class="tab-view active" id="schedule">
+      <div class="card">
+        <div class="row between center">
+          <h2>Weekly Schedule</h2>
+          <div class="row gap">
+            <button id="prev-week" title="Previous Week">◀</button>
+            <div id="week-label"></div>
+            <button id="next-week" title="Next Week">▶</button>
+          </div>
+        </div>
+        <div class="legend">
+          <span class="legend-item"><span class="dot busy"></span>Busy</span>
+          <span class="legend-item"><span class="dot study"></span>Study</span>
+          <span class="legend-item"><span class="dot completed"></span>Completed</span>
+        </div>
+        <div class="grid seven" id="week-grid"></div>
+      </div>
+
+      <div class="grid two">
+        <div class="card">
+          <h3>Add Busy Event</h3>
+          <form id="busy-form" class="stack">
+            <input id="busy-title" type="text" placeholder="Event title" required />
+            <div class="row gap">
+              <input id="busy-date" type="date" required />
+              <input id="busy-start" type="time" required />
+              <input id="busy-end" type="time" required />
+            </div>
+            <button class="secondary" type="submit">Add Busy Event</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Selected Item</h3>
+          <div id="slot-details" class="muted">Select a busy or study slot to edit.</div>
+          <div class="stack" id="slot-edit" style="display:none;">
+            <div class="row gap">
+              <input type="date" id="slot-edit-date" />
+              <input type="time" id="slot-edit-start" />
+              <input type="time" id="slot-edit-end" />
+            </div>
+            <div class="row gap">
+              <button id="slot-save" class="primary">Save Changes</button>
+              <button id="slot-delete" class="warning">Delete</button>
+            </div>
+          </div>
+          <div class="row gap" id="slot-actions" style="display:none; margin-top:8px;">
+            <button id="check-in" class="secondary">Check In</button>
+            <button id="mark-complete" class="secondary">Mark Complete</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div>
+      <strong>Daily Streak:</strong> <span id="streak-count">0</span> 🔥
+    </div>
+    <div class="muted">Data stored locally in your browser (localStorage)</div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
