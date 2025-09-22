@@ -98,6 +98,56 @@
     </li>
   </template>
 
+  <!-- Feature In-Progress Modal -->
+  <div id="feature-modal" class="modal-backdrop" style="display:none;">
+    <div class="modal">
+      <div class="row between center" style="margin-bottom:8px;">
+        <h3 style="margin:0;">Heads up</h3>
+        <button id="close-feature-modal" class="tiny">✕</button>
+      </div>
+      <div class="stack">
+        <p>This feature is still in progress.</p>
+        <div class="row end">
+          <button id="ok-feature-modal" class="primary">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
+  <script>
+    // Intercept Add Friend and Create Group to show in-progress modal
+    (function(){
+      const addFriendForm = document.getElementById('add-friend-form');
+      const groupForm = document.getElementById('group-form');
+      const modal = document.getElementById('feature-modal');
+      const closeBtn = document.getElementById('close-feature-modal');
+      const okBtn = document.getElementById('ok-feature-modal');
+
+      function openFeatureModal() {
+        if (modal) modal.style.display = 'grid';
+      }
+      function closeFeatureModal() {
+        if (modal) modal.style.display = 'none';
+      }
+
+      if (addFriendForm) addFriendForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        openFeatureModal();
+      });
+
+      if (groupForm) groupForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        openFeatureModal();
+      });
+
+      if (closeBtn) closeBtn.addEventListener('click', closeFeatureModal);
+      if (okBtn) okBtn.addEventListener('click', closeFeatureModal);
+      // Close when clicking outside modal content
+      if (modal) modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeFeatureModal();
+      });
+    })();
+  </script>
 </body>
 </html>
