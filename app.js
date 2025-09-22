@@ -4,6 +4,8 @@
 (function () {
   const LS_KEY = 'studySchedulerState_v1';
   const now = new Date();
+  // Backend base URL (Flask server). If not running, app still works with localStorage only.
+  const BACKEND_URL = 'http://localhost:5000';
 
   // ---- Utilities ----
   const uid = () => Math.random().toString(36).slice(2, 10);
@@ -66,6 +68,32 @@
     const s = defaultState();
     saveState(s);
     return s;
+  }
+
+  // Attempt to load state from backend if logged in. On success, replace local state and re-render.
+  async function tryLoadServerState() {
+    try {
+      const meRes = await fetch(`${BACKEND_URL}/api/me`, { credentials: 'include' });
+      if (!meRes.ok) return; // not logged in
+      const me = await meRes.json();
+      if (!me.loggedIn) return;
+      const stRes = await fetch(`${BACKEND_URL}/api/state`, { credentials: 'include' });
+      if (!stRes.ok) return;
+      const j = await stRes.json();
+      if (j && j.state) {
+        state = j.state;
+        // persist locally too
+        saveState(state);
+        // After loading server state, ensure sessions are generated and UI reflects it
+        regenerateSessionsForWeeksAround(currentWeekStart);
+        if (document.getElementById('week-grid')) renderSchedule();
+        if (document.getElementById('goals-list')) renderGoals();
+        if (document.getElementById('goals-summary') || document.getElementById('feed')) renderDashboard();
+        if (document.getElementById('goals-active') || document.getElementById('goals-completed')) renderGoalsPage();
+      }
+    } catch (_) {
+      // ignore network/parse errors; app still works offline
+    }
   }
 
   // ---- Goals Page (goals.html) ----
@@ -165,6 +193,15 @@
   }
   function saveState(s = state) {
     localStorage.setItem(LS_KEY, JSON.stringify(s));
+    // Fire-and-forget sync to backend if logged in
+    try {
+      fetch(`${BACKEND_URL}/api/state`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ state: s })
+      }).catch(() => {});
+    } catch (_) { /* ignore */ }
   }
 
   // ---- Tabs ----
@@ -750,8 +787,9 @@
         wrap.className = 'stack';
         const completedMin = sumCompletedMinutesForGoalInRange(g.id, start, end);
         const targetMin = g.hoursPerWeek * 60;
-        const pct = targetMin ? clamp(Math.round((completedMin / targetMin) * 100), 0, 100) : 0;
-        wrap.innerHTML = `<div class="row between"><strong>${g.title}</strong><span class="muted">${(completedMin/60).toFixed(1)}h / ${g.hoursPerWeek}h</span></div>
+        const pct = g.completed ? 100 : (targetMin ? clamp(Math.round((completedMin / targetMin) * 100), 0, 100) : 0);
+        const rightLabel = g.completed ? 'Completed' : `${(completedMin/60).toFixed(1)}h / ${g.hoursPerWeek}h`;
+        wrap.innerHTML = `<div class="row between"><strong>${g.title}</strong><span class="muted">${rightLabel}</span></div>
           <div class="progress"><div class="progress-bar" style="width:${pct}%"></div></div>`;
         goalsSummary.appendChild(wrap);
       });
@@ -851,4 +889,6 @@
   if (document.getElementById('goals-list')) renderGoals();
   if (document.getElementById('goals-summary') || document.getElementById('feed')) renderDashboard();
   if (document.getElementById('goals-active') || document.getElementById('goals-completed')) renderGoalsPage();
+  // Try to hydrate from server after initial local render
+  tryLoadServerState();
 })();

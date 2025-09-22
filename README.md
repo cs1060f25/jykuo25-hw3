@@ -12,7 +12,7 @@ A lightweight, local-first web app to schedule work/study time, track progress w
 - Goals: create/edit recurring goals with preferences; progress bars reflect completed time
 - Persistence: localStorage (no backend required)
 
-## Run locally
+## Run locally (frontend only)
 
 Option A: Open `index.html` directly in your browser.
 
@@ -21,7 +21,51 @@ Option B: Use a simple local server (recommended):
 ```bash
 python3 -m http.server 5500
 ```
-Then open http://localhost:5500/study-scheduler/
+Then open http://localhost:5500/index.html
+
+## Optional: Backend login + server-side saving
+
+This project now includes a minimal Flask backend for authentication and per-user state storage (file-based). It is optional — the app still works with localStorage only — but when logged in, state will be loaded from and saved to the server for increased persistence.
+
+### Backend setup
+
+1. Create a virtual environment (recommended) and install requirements.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r backend/requirements.txt
+```
+
+2. Run the backend (default port 5000):
+
+```bash
+python backend/app.py
+```
+
+The backend will accept CORS requests from the static site at http://localhost:5500.
+
+### Start the frontend static server
+
+In another terminal, serve the frontend (default port 5500):
+
+```bash
+python3 -m http.server 5500
+```
+
+Open http://localhost:5500/login.html to log in.
+
+### Login credentials
+
+- Username: `test-user`
+- Password: `password`
+
+On successful login, you will be redirected to `index.html`. While logged in, the app will:
+
+- Load previously saved state from `GET /api/state` and hydrate the UI.
+- Persist every change by POSTing the full state to `POST /api/state`.
+
+If the backend is not running or you are not logged in, the app will seamlessly continue using `localStorage` only.
 
 ## Data model (stored in localStorage)
 
