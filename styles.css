@@ -143,3 +143,30 @@ input, select, textarea {
   width: min(720px, 92vw); background: var(--card); border: 1px solid rgba(255,255,255,0.12);
   border-radius: 12px; padding: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
 }
+
+/* User tab pill with avatar */
+.tab-button.user-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.18);
+  border-radius: 999px;
+  padding: 6px 10px;
+}
+.tab-button.user-tab.active {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.25);
+}
+.tab-button.user-tab::before {
+  content: "";
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: inline-block;
+  background-size: cover;
+  background-position: center;
+  background-color: #334155; /* fallback */
+  border: 1px solid rgba(255,255,255,0.25);
+  /* Placeholder avatar (SVG) */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><defs/><circle cx="32" cy="32" r="32" fill="%235865F2"/><circle cx="32" cy="26" r="12" fill="%23ffffff" opacity="0.9"/><path d="M16 54c4-10 14-14 16-14s12 4 16 14" fill="%23ffffff" opacity="0.9"/></svg>');
+}

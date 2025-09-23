@@ -72,6 +72,22 @@
 
   // (Moved Now button binding below after DOM nodes are defined)
 
+  // Update the User nav tab text with the logged-in username, if any
+  async function refreshUserNav() {
+    try {
+      const links = document.querySelectorAll('a.user-tab');
+      if (!links.length) return;
+      const meRes = await fetch(`${BACKEND_URL}/api/me`, { credentials: 'include' });
+      if (!meRes.ok) { links.forEach((a)=> a.textContent = 'User'); return; }
+      const me = await meRes.json();
+      const label = (me && me.loggedIn && me.user && me.user.username) ? `@${me.user.username}` : 'User';
+      links.forEach((a)=> { a.textContent = label; a.classList.add('user-tab'); });
+    } catch {
+      const links = document.querySelectorAll('a.user-tab');
+      links.forEach((a)=> a.textContent = 'User');
+    }
+  }
+
   // Attempt to load state from backend if logged in. On success, replace local state and re-render.
   async function tryLoadServerState() {
     try {
@@ -92,6 +108,8 @@
         if (document.getElementById('goals-list')) renderGoals();
         if (document.getElementById('goals-summary') || document.getElementById('feed')) renderDashboard();
         if (document.getElementById('goals-active') || document.getElementById('goals-completed')) renderGoalsPage();
+        // Update nav label with username if available
+        refreshUserNav();
       }
     } catch (_) {
       // ignore network/parse errors; app still works offline
@@ -947,4 +965,6 @@
   if (document.getElementById('goals-active') || document.getElementById('goals-completed')) renderGoalsPage();
   // Try to hydrate from server after initial local render
   tryLoadServerState();
+  // Update the nav text on load
+  refreshUserNav();
 })();
