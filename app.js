@@ -70,6 +70,8 @@
     return s;
   }
 
+  // (Moved Now button binding below after DOM nodes are defined)
+
   // Attempt to load state from backend if logged in. On success, replace local state and re-render.
   async function tryLoadServerState() {
     try {
@@ -561,6 +563,7 @@
   const weekGrid = document.getElementById('week-grid');
   const prevWeekBtn = document.getElementById('prev-week');
   const nextWeekBtn = document.getElementById('next-week');
+  const nowBtn = document.getElementById('now-btn');
   const slotDetails = document.getElementById('slot-details');
   const slotActions = document.getElementById('slot-actions');
   const checkInBtn = document.getElementById('check-in');
@@ -576,6 +579,17 @@
 
   if (prevWeekBtn) prevWeekBtn.addEventListener('click', () => { currentWeekStart = addDays(currentWeekStart, -7); regenerateSessionsForWeeksAround(currentWeekStart); renderSchedule(); });
   if (nextWeekBtn) nextWeekBtn.addEventListener('click', () => { currentWeekStart = addDays(currentWeekStart, 7); regenerateSessionsForWeeksAround(currentWeekStart); renderSchedule(); });
+  // Jump to current time within the schedule by scrolling the main container
+  if (nowBtn) nowBtn.addEventListener('click', () => {
+    const HOUR_PX = 48;
+    const d = new Date();
+    const y = (d.getHours() + d.getMinutes()/60) * HOUR_PX;
+    const container = document.getElementById('week-grid');
+    if (container) {
+      const offset = Math.max(0, y - container.clientHeight * 0.33);
+      container.scrollTo({ top: offset, behavior: 'smooth' });
+    }
+  });
 
   function getWeekBounds(weekStart) {
     const start = startOfWeek(weekStart);
@@ -589,8 +603,45 @@
 
     regenerateSessionsForWeek(currentWeekStart);
 
-    // Build columns
+    // Parameters for hourly layout
+    const HOUR_PX = 48; // pixel height per hour
+    const DAY_HEIGHT = 24 * HOUR_PX;
+
+    // Build: time column + 7 day columns
     weekGrid.innerHTML = '';
+
+    // Time column
+    const timeCol = document.createElement('div');
+    timeCol.className = 'time-col';
+    const timeHead = document.createElement('div');
+    timeHead.className = 'time-head';
+    timeHead.textContent = 'Time';
+    const timeBody = document.createElement('div');
+    timeBody.className = 'time-body';
+    const timeInner = document.createElement('div');
+    timeInner.className = 'time-inner';
+    for (let h = 0; h <= 24; h++) {
+      const y = h * HOUR_PX;
+      if (h < 24) {
+        const label = document.createElement('div');
+        label.className = 'hour-label';
+        label.style.top = y + 'px';
+        const hourStr = (h % 24).toString().padStart(2, '0') + ':00';
+        label.textContent = hourStr;
+        timeInner.appendChild(label);
+      }
+      const line = document.createElement('div');
+      line.className = 'hour-line';
+      line.style.top = y + 'px';
+      timeInner.appendChild(line);
+    }
+    timeBody.appendChild(timeInner);
+    timeCol.appendChild(timeHead);
+    timeCol.appendChild(timeBody);
+    weekGrid.appendChild(timeCol);
+
+    // Day columns
+    // We will use a single scrollbar on the outer #week-grid; inner columns are tall
     for (let i = 0; i < 7; i++) {
       const day = addDays(start, i);
       const col = document.createElement('div');
@@ -599,42 +650,48 @@
       head.className = 'day-head';
       head.textContent = day.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
       const body = document.createElement('div');
-      body.className = 'day-body';
+      body.className = 'day-body-hourly';
+      const inner = document.createElement('div');
+      inner.className = 'day-inner';
+
+      // Hour grid lines to match time column
+      for (let h = 0; h <= 24; h++) {
+        const line = document.createElement('div');
+        line.className = 'hour-line';
+        line.style.top = (h * HOUR_PX) + 'px';
+        inner.appendChild(line);
+      }
 
       // Gather busy and sessions for the day
       const dayBusy = state.busy.filter((b) => sameDay(new Date(b.startISO), day));
       const daySessions = state.sessions.filter((s) => sameDay(new Date(s.startISO), day));
-
       const items = [
         ...dayBusy.map((b) => ({ type: 'busy', start: new Date(b.startISO), end: new Date(b.endISO), title: b.title, busy: b })),
         ...daySessions.map((s) => ({ type: s.status === 'completed' ? 'completed' : 'study', start: new Date(s.startISO), end: new Date(s.endISO), session: s })),
       ];
 
-      // Sort by start time
-      items.sort((a, b) => a.start - b.start);
+      // Render items as absolutely positioned blocks
+      items.forEach((it) => {
+        const startMin = it.start.getHours() * 60 + it.start.getMinutes();
+        const endMin = it.end.getHours() * 60 + it.end.getMinutes();
+        const top = (startMin / 60) * HOUR_PX;
+        const height = Math.max(12, ((endMin - startMin) / 60) * HOUR_PX);
+        const div = document.createElement('div');
+        div.className = `slot ${it.type}`;
+        div.style.top = top + 'px';
+        div.style.height = height + 'px';
+        if (it.type === 'busy') {
+          div.textContent = `${fmtTime(it.start)}–${fmtTime(it.end)} • ${it.title}`;
+          div.addEventListener('click', () => selectBusy(it.busy));
+        } else {
+          const g = state.goals.find((x) => x.id === it.session.goalId);
+          div.textContent = `${fmtTime(it.start)}–${fmtTime(it.end)} • ${g ? g.title : 'Study'}`;
+          div.addEventListener('click', () => selectSession(it.session));
+        }
+        inner.appendChild(div);
+      });
 
-      // Render items as blocks
-      if (items.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'slot';
-        empty.textContent = '—';
-        body.appendChild(empty);
-      } else {
-        items.forEach((it) => {
-          const div = document.createElement('div');
-          div.className = `slot ${it.type}`;
-          if (it.type === 'busy') {
-            div.textContent = `${fmtTime(it.start)}–${fmtTime(it.end)} • ${it.title}`;
-            div.addEventListener('click', () => selectBusy(it.busy));
-          } else {
-            const g = state.goals.find((x) => x.id === it.session.goalId);
-            div.textContent = `${fmtTime(it.start)}–${fmtTime(it.end)} • ${g ? g.title : 'Study'}`;
-            div.addEventListener('click', () => selectSession(it.session));
-          }
-          body.appendChild(div);
-        });
-      }
-
+      body.appendChild(inner);
       col.appendChild(head);
       col.appendChild(body);
       weekGrid.appendChild(col);
@@ -644,7 +701,6 @@
     document.getElementById('streak-count').textContent = computeStreak();
 
     // Clear slot details if not valid
-    // clear selection if item no longer exists
     if (selectedItem) {
       if (selectedItem.kind === 'session' && !state.sessions.find((s) => s.id === selectedItem.id)) clearSlotSelection();
       if (selectedItem.kind === 'busy' && !state.busy.find((b) => b.id === selectedItem.id)) clearSlotSelection();
