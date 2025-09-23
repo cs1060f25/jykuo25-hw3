@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Scheduler • User</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">📚 Study Scheduler</div>
+    <nav class="tabs">
+      <a class="tab-button" href="index.html">Dashboard</a>
+      <a class="tab-button" href="schedule.html">Schedule</a>
+      <a class="tab-button" href="goals.html">Goals</a>
+      <a class="tab-button" href="friends.html">Friends</a>
+      <a class="tab-button active" href="user.html">User</a>
+    </nav>
+  </header>
+
+  <main class="tab-views">
+    <section class="tab-view active" id="user-page">
+      <div class="grid two">
+        <div class="card">
+          <h2>Your Profile</h2>
+          <div class="stack">
+            <div><strong>Name:</strong> <span id="profile-name">You</span></div>
+            <div><strong>Username:</strong> <span id="profile-username">local</span></div>
+            <div class="muted">When logged in via the backend, these values reflect your session.</div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Calendar Integrations</h2>
+          <div class="stack">
+            <p class="muted">Connect your calendar to sync events and availability.</p>
+            <div class="row gap">
+              <button id="connect-gcal" class="primary">Connect Google Calendar</button>
+              <button id="connect-ical" class="secondary">Connect iCal</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div>
+      <strong>Daily Streak:</strong> <span id="streak-count">0</span> 🔥
+    </div>
+    <div class="muted">Data stored locally in your browser (localStorage)</div>
+  </footer>
+
+  <!-- Feature In-Progress Modal (reused pattern) -->
+  <div id="feature-modal" class="modal-backdrop" style="display:none;">
+    <div class="modal">
+      <div class="row between center" style="margin-bottom:8px;">
+        <h3 style="margin:0;">Heads up</h3>
+        <button id="close-feature-modal" class="tiny">✕</button>
+      </div>
+      <div class="stack">
+        <p>This feature is still in progress.</p>
+        <div class="row end">
+          <button id="ok-feature-modal" class="primary">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    (function(){
+      // Try to show backend session info if available
+      const nameEl = document.getElementById('profile-name');
+      const userEl = document.getElementById('profile-username');
+      fetch('http://localhost:5000/api/me', { credentials: 'include' })
+        .then(r => r.ok ? r.json() : null)
+        .then(j => {
+          if (j && j.loggedIn) {
+            userEl.textContent = j.user.username || 'user';
+            nameEl.textContent = 'You';
+          }
+        }).catch(()=>{});
+
+      // Reuse the in-progress modal for integrations
+      const modal = document.getElementById('feature-modal');
+      const closeBtn = document.getElementById('close-feature-modal');
+      const okBtn = document.getElementById('ok-feature-modal');
+      const gcalBtn = document.getElementById('connect-gcal');
+      const icalBtn = document.getElementById('connect-ical');
+      function openModal(){ if (modal) modal.style.display = 'grid'; }
+      function closeModal(){ if (modal) modal.style.display = 'none'; }
+      if (gcalBtn) gcalBtn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
+      if (icalBtn) icalBtn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      if (okBtn) okBtn.addEventListener('click', closeModal);
+      if (modal) modal.addEventListener('click', (e)=>{ if (e.target === modal) closeModal(); });
+    })();
+  </script>
+</body>
+</html>
