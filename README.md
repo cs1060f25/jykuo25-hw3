@@ -1,7 +1,7 @@
 Name: Jodie Kuo <br>
 GitHub Username: jykuo25 <br>
 Deployed Version: https://jykuo25-hw3.netlify.app/ <br>
-Team PRD: 
+Team PRD: https://drive.google.com/file/d/1MBV21x6vziwJByMBRXvIH-4EElImC8Qv/view?usp=sharing 
 
 # Study Scheduler
 
